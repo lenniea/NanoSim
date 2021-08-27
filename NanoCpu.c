@@ -25,24 +25,24 @@
 #define NANO_PREFIX(p)  (p->prefix != NO_PREFIX)
 
 /*
- *  ALU Rd,#imm
+ *  ALU Rx,#imm
  *   _______________________________________________________________
  *  |               |               |                               |
- *  |     opcode    |       Rd      |             imm8              |
+ *  |      alu      |       Rx      |             imm8              |
  *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
  *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
  *
- *  ALU Rd,Ra,Rb
+ *  ALU Rx,Rx,Ry
  *   _______________________________________________________________
  *  |               |               |               |               | 
- *  |     opcode    |      Rd       |      Ra       |      Rb       |
+ *  |       A       |       Rx      |      Ry       |      alu      |
  *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
  *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
  *
- *  JAL Rd,addr
+ *  JAL Rx,addr
  *   _______________________________________________________________
  *  |               |               |                               |
- *  |     opcode    |       Rd      |             imm8              |
+ *  |     opcode    |       Rx      |             imm8              |
  *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
  *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
  *
@@ -61,15 +61,14 @@
  *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
  */
 
-#define GET_OPC(opc)    (((opc) >> 12) & 0x0f)
-#define OPC_RD(opc)     (((opc) >> NANO_RD) & 0x0f)
-#define OPC_RA(opc)     (((opc) >> NANO_RA) & 0x0f)
-#define OPC_COND(opc)   (((opc) >> 9) & 0x0f)
+#define GET_OPC(opc)	(((opc) >> NANO_FUNC) & 0x0f)
+#define OPC_COND(opc)   (((opc) >> NANO_RX) & 0x0f)
 
-#define OPC_FUNC(opc)   (((opc) >> NANO_FUNC) & 0x0f)
-#define OPC_RB(opc)     (((opc) >> NANO_RB) & 0x0f)
+#define OPC_RX(opc)     (((opc) >> NANO_RX) & 0x0f)
+#define OPC_RY(opc)     (((opc) >> NANO_RY) & 0x0f)
+#define OPC_RZ(opc)     ((opc) & 0x0f)
 
-#define OPC_RS(opc)     ((opc) & 0x0f)
+#define OPC_OFF4(opc)   (((opc) & 0x0f)*2)
 #define OPC_IMM8(opc)   ((opc) & 0xff)
 
 #define OPC_IMM12(opc)  ((opc) & 0xFFF)
@@ -157,7 +156,7 @@ void NanoReset(NANO_CPU* p)
     r = (a) + (b) + (carry); \
     carry = carry ? (r <= (a)) || (r <= (b)) : (r < (a)) || (r < (b));
 
-void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rd, NANO_WORD a, NANO_WORD b)
+void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rx, NANO_WORD a, NANO_WORD b)
 {
     NANO_WORD result;
     NANO_WORD cond;
@@ -171,7 +170,7 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rd, NANO_WORD a, NANO_WORD b)
 		carry = 0;
     case ALU_ADC:   /* Add w/ Carry */
         ALU_ADDSUB(result, a, b, carry);
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
 	case ALU_SUB:
 		carry = 0;
@@ -180,19 +179,19 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rd, NANO_WORD a, NANO_WORD b)
         b = ~b;
         ALU_ADDSUB(result, a, b, carry);
         carry = !carry;
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
     case ALU_AND:   /* And */
         result = a & b;
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
     case ALU_OR:    /* Or */
         result = a | b;
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
     case ALU_XOR:   /* eXclusive Or */
         result = a ^ b;
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
 #if 0
     case ALU_SHIFT: /* SHIFT */
@@ -205,7 +204,7 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rd, NANO_WORD a, NANO_WORD b)
             else
                 result = ((NANO_WORD) result >> 1);
         }
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
     case ALU_LSH:   /* Logical Shift */
         b = b & SHIFT_MASK;
@@ -217,7 +216,7 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rd, NANO_WORD a, NANO_WORD b)
             else
                 result = ((NANO_WORD) result >> 1);
         }
-        WRITE_REG(p, Rd, result);
+        WRITE_REG(p, Rx, result);
         break;
 #endif
     }
@@ -249,7 +248,7 @@ static int InstLength(NANO_ADDR addr)
         type = GET_OPC(opc);
         length += 2;
     }
-    while (type == OPC_PREFIX);
+    while (type == OPC_IMM);
     return length;
 }
 
@@ -262,9 +261,6 @@ BOOL NanoTestCond(NANO_CPU* p, int cond)
     {
     case COND_BRA:  /* true */
         br = 1;
-        break;
-    case COND_BRN:  /* false */
-        br = 0;
         break;
     case COND_BHI:  /* c | z=0 */
         br = (p->ccr & (NANO_C|NANO_Z)) == 0;
@@ -284,12 +280,6 @@ BOOL NanoTestCond(NANO_CPU* p, int cond)
     case COND_BNE:  /* z=0 */
         br = (p->ccr & NANO_Z) == 0;
         break;
-    case COND_BMI:  /* n=1 */
-        br = (p->ccr & NANO_N);
-        break;
-    case COND_BPL:  /* n=0 */
-        br = (p->ccr & NANO_N) == 0;
-        break;
     case COND_BGE:  /* n^v=0 */
         data = p->ccr & (NANO_N|NANO_V);
         br = (data == 0) || (data == (NANO_N|NANO_V));
@@ -306,6 +296,10 @@ BOOL NanoTestCond(NANO_CPU* p, int cond)
         data = p->ccr & (NANO_N|NANO_V|NANO_Z);
         br = (data != 0) && (data != (NANO_N|NANO_V));
         break;
+	case COND_RET:
+		// TODO: implement RETurn
+		br = TRUE;
+		break;
     default:
         br = FALSE;
     }
@@ -346,7 +340,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
         NANO_INST opc;
         NANO_ADDR addr;
         NANO_WORD data;
-        int Rd,Ra,Rb;
+        int Rx,Ry;
 
         int cycles = MemReadWord(p->pc, &opc);
         p->cycles += cycles;
@@ -354,9 +348,9 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
         p->pc += 2;
 
 		/* Decode (register) fields */
-		Ra = OPC_RA(opc);
-		Rb = OPC_RD(opc);
-		Rd = OPC_RD(opc);
+		Rx = OPC_RX(opc);
+		Ry = OPC_RY(opc);
+		Ry = OPC_RZ(opc);
 
         switch (GET_OPC(opc))
 		{
@@ -364,99 +358,84 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 			p->ccr &= ~NANO_C; // Clear CARRY
             data = ((p)->prefix << 8) | OPC_IMM8(opc);
 
-            NanoAluOp(p, ALU_ADC, Rd, p->reg[Rd], data);
+            NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_SUB_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
             data = ((p)->prefix << 8) | OPC_IMM8(opc);
 
-            NanoAluOp(p, ALU_ADC, Rd, p->reg[Rd], data);
+            NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
             p->prefix = NO_PREFIX;
             break;
-        case OPC_SUB_REG:
+		case OPC_ADC_IMM:
+			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+
+			NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
+			p->prefix = NO_PREFIX;
+			break;
+		case OPC_SBC_IMM:
+			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+
+			NanoAluOp(p, ALU_SBC, Rx, p->reg[Rx], data);
+			p->prefix = NO_PREFIX;
+			break;
+		case OPC_RSUB_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            NanoAluOp(p, ALU_SBC, Rd, p->reg[Ra], p->reg[Rb]);
-            p->prefix = NO_PREFIX;
-            break;
-        case OPC_ADD_REG:
-			p->ccr &= ~NANO_C; // Clear CARRY
-            NanoAluOp(p, ALU_SBC, Rd, p->reg[Ra], p->reg[Rb]);
-            p->prefix = NO_PREFIX;
-            break;
-        case OPC_AND_IMM:
+			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+
+			NanoAluOp(p, ALU_RSUB, Rx, p->reg[Rx], data);
+			p->prefix = NO_PREFIX;
+			break;
+		case OPC_AND_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
             data = ((p)->prefix << 8) | OPC_IMM8(opc);
 
-            NanoAluOp(p, ALU_AND, Rd, p->reg[Rd], data);
+            NanoAluOp(p, ALU_AND, Rx, p->reg[Rx], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_OR_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
             data = ((p)->prefix << 8) | OPC_IMM8(opc);
 
-            NanoAluOp(p, ALU_OR, Rd, p->reg[Rd], data);
+            NanoAluOp(p, ALU_OR, Rx, p->reg[Rx], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_XOR_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
             data = ((p)->prefix << 8) | OPC_IMM8(opc);
 
-            NanoAluOp(p, ALU_XOR, Rd, p->reg[Rd], data);
+            NanoAluOp(p, ALU_XOR, Rx, p->reg[Rx], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_ALU_REG:
-            NanoAluOp(p, Ra, Rd, p->reg[Rd], Rb);
+            NanoAluOp(p, Rx, Rx, p->reg[Rx], Ry);
             p->prefix = NO_PREFIX;
             break;
-        case OPC_LDST:
-            addr = p->reg[Ra];
-			if (opc & OPC_LDST_BIT)
+        case OPC_LD:
+            addr = p->reg[Rx] + OPC_OFF4(opc);
+			if (addr & 1)
 			{
-				switch (opc & OPC_SIZE_MASK)
-				{
-				case OPC_BYTE:
-					data = NanoLoadByte(p, addr);
-					break;
-				case OPC_WORD:
-					data = NanoLoadWord(p, addr);
-					break;
-				case OPC_LONG:
-					data = NanoLoadLong(p, addr);
-					break;
-				default:
-		            NanoIllegalOpcode(p);
-				}
-	            WRITE_REG(p, Rd, data);
+				// Load Byte
+				data = NanoLoadByte(p, addr);
 			}
 			else
 			{
-				NANO_WORD data = p->reg[Rd];
-				switch (opc & OPC_SIZE_MASK)
-				{
-				case OPC_BYTE:
-					NanoStoreByte(p, addr, data);
-					break;
-				case OPC_WORD:
-					NanoStoreWord(p, addr, data);
-					break;
-				case OPC_LONG:
-					NanoStoreLong(p, addr, data);
-					break;
-				default:
-		            NanoIllegalOpcode(p);
-				}
-
+				data = NanoLoadWord(p, addr);
+				break;
 			}
-            p->prefix = NO_PREFIX;
-            break;
-        case OPC_CALL:
-            addr = (p->prefix << 8) | OPC_IMM8(opc);
-            WRITE_REG(p, Rd, p->pc);
-            p->pc = addr;
-            p->cycles += 2;
-            p->prefix = NO_PREFIX;
-            break;
+			break;
+		case OPC_ST:
+			addr = p->reg[Rx] + OPC_OFF4(opc);
+			if (addr & 1)
+			{
+				NanoStoreByte(p, addr, data);
+			}
+			else
+			{
+				NanoStoreWord(p, addr, data);
+			}
+			break;
         case OPC_BRANCH:
 		{
             int br = NanoTestCond(p, OPC_COND(opc));
@@ -466,7 +445,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
             }
             break;
         }
-        case OPC_PREFIX:
+        case OPC_IMM:
             p->prefix = (p->prefix << 12) | OPC_IMM12(opc);
             break;
         default:
@@ -486,11 +465,11 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
  *  ===== Table of ALU operations =====
  *  Must match order of ALU_OP...
  */
-char szAlu[16][4] =
+char szAlu[16][5] =
 {
 /*   0/8     1/9     2/A     3/B     4/C     5/D     6/E     7/F  */
-    "add",  "sub",  "adc",  "sbc ", "and",  "or ",  "xor",  "sft",
-    "add",  "sub",  "adc",  "sbc ", "and",  "or ",  "xor",  "sft",
+    "add",  "sub",  "adc",  "sbc ", "rsub",  "and",  "or ",  "xor",
+    "add",  "sub",  "adc",  "sbc ", "rsub",  "and",  "or ",  "xor"
 };
 
 /*
@@ -500,8 +479,8 @@ char szAlu[16][4] =
 char szBra[16][4] =
 {
 /*   0/8    1/9    2/A    3/B    4/C    5/D    6/E    7/F  */
-    "bra", "brn", "bhi", "bls", "bhs", "blo", "bne", "beq",
-    "bvs", "bvc", "bpl", "bmi", "bge", "blt", "bgt", "ble"
+    "beq", "bne", "bhi", "bls", "bhs", "blo", "bgt", "ble",
+    "bge", "blt", "bra", "jmp", "?BC", "?BD", "?BE", "?BF"
 };
 
 char szRegName[16][4] =
@@ -511,84 +490,63 @@ char szRegName[16][4] =
     "r8",  "r9",  "r10", "r11", "r12", "r13", "sp",  "r15"
 };
 
-char szLoadStore[8][5] =
-{
-/*   0/8    1/9    2/A    3/B    4/C    5/D    6/E    7/F  */
-    "ld.b","ld.w","ld.l","ld.x","st.b","st.w","st.l","st.x"
-};
-
 /*
  *  ===== NanoDisAsm =====
  *      Disassemble one instruction.  Note: prefixes are treated as
  *  separate instructions to mimic the behaviour of the hardware.
  */
-int NanoDisAsm(const NANO_ADDR addr, char* line)
+int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 {
-    /* Fetch 16-bit instruction opcode */
-    NANO_INST opc;
-    int size, length;
-	int Ra, Rb, Rd;
-
-    MemReadWord(addr, &opc);    /* ignore number of cycles */
+    int length;
+	int Rx, Ry;
 
 	/* Decode (register) fields */
-	Ra = OPC_RA(opc);
-	Rb = OPC_RB(opc);
-	Rd = OPC_RD(opc);
+	Rx = OPC_RX(opc);
+	Ry = OPC_RY(opc);
 
     switch (GET_OPC(opc))
 	{
-    case OPC_ADD_REG:
-		length = sprintf(line, "add  %s,%s,%s", szRegName[Rd], szRegName[Ra], szRegName[Rb]);
-		break;
-    case OPC_SUB_REG:
-		length = sprintf(line, "sub  %s,%s,%s", szRegName[Rd], szRegName[Ra], szRegName[Rb]);
-		break;
     case OPC_ADD_IMM:
-        length = sprintf(line, "add  %s,#%u", szRegName[Rd], OPC_IMM8(opc));
+		length = sprintf_s(line, len, "add  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_SUB_IMM:
-        length = sprintf(line, "sub  %s,#%u", szRegName[Rd], OPC_IMM8(opc));
+		length = sprintf_s(line, len, "sub  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
-    case OPC_AND_IMM:
-        length = sprintf(line, "and  %s,#%u", szRegName[Rd], OPC_IMM8(opc));
+	case OPC_ADC_IMM:
+		length = sprintf_s(line, len, "adc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		break;
+	case OPC_SBC_IMM:
+		length = sprintf_s(line, len, "sbc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		break;
+	case OPC_RSUB_IMM:
+		length = sprintf_s(line, len, "rsub %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		break;
+	case OPC_AND_IMM:
+		length = sprintf_s(line, len, "and  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_OR_IMM:
-        length = sprintf(line, "or   %s,#%u", szRegName[Rd], OPC_IMM8(opc));
+		length = sprintf_s(line, len, "or   %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_XOR_IMM:
-        length = sprintf(line, "xor  %s,#%u", szRegName[Rd], OPC_IMM8(opc));
-        break;
-    case OPC_USR1_IMM:
-        length = sprintf(line, "usr1 %s,#%u", szRegName[Rd], OPC_IMM8(opc));
-        break;
-    case OPC_USR2_IMM:
-        length = sprintf(line, "usr2 %s,#%u", szRegName[Rd], OPC_IMM8(opc));
-        break;
-    case OPC_USR3_IMM:
-        length = sprintf(line, "usr3 %s,#%u", szRegName[Rd], OPC_IMM8(opc));
+		length = sprintf_s(line, len, "xor  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_ALU_REG:
-        length = sprintf(line, "%s  %s,%s",   szAlu[Ra], szRegName[Rd], szRegName[Rb]);
+		length = sprintf_s(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_BRANCH:
-        length = sprintf(line, "%-4s " NANO_SZADDR, szBra[Rd], addr + 2*SIGN_EXT(opc, 128) + 2);
+		length = sprintf_s(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
-    case OPC_CALL:
-        length = sprintf(line, "jal %s,%u",  szRegName[Rd], OPC_IMM8(opc));
+    case OPC_LD:
+		length = sprintf_s(line, len, "ld  %s,[%s]", szRegName[Rx], szRegName[Ry]);
         break;
-    case OPC_LDST:
-        size = opc & OPC_SIZE_MASK;
-        length = sprintf(line, "%s %s,[%s]", szLoadStore[size], szRegName[Ra], szRegName[Rb]);
+    case OPC_ST:
+		length = sprintf_s(line, len, "st  %s,%u[sp]", szRegName[Rx], OPC_IMM8(opc));
         break;
-    case OPC_LEA_OFF:
-        length = sprintf(line, "lea  %s,%u[sp]", szRegName[Rd], OPC_IMM8(opc));
-        break;
-    case OPC_PREFIX:
-        length = sprintf(line, "imm #%04x", OPC_IMM12(opc));
+    case OPC_IMM:
+		length = sprintf_s(line, len, "imm #%04x", OPC_IMM12(opc));
         break;
     default:
-        length = sprintf(line, "%04x???", opc);
+		length = sprintf_s(line, len, "%04x???", opc);
         break;
     }
     return length;

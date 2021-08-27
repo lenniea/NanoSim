@@ -3,16 +3,17 @@
 #ifndef __NANOCPU_H__
 #define __NANOCPU_H__
 
+#include <tchar.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 #define NANO_FUNC           12
-#define NANO_RD             8
-#define NANO_RA             4
-#define NANO_RB             0
-#define NANO_FUNC           12
+#define NANO_RX             8
+#define NANO_RY             4
+#define NANO_RZ             0
 
 /*
  *  Arithmetic Logic Unit
@@ -24,10 +25,19 @@ typedef enum
     ALU_SUB   =  1,     /* SUBtract */
     ALU_ADC   =  2,     /* Add with Carry */
     ALU_SBC   =  3,     /* SuBtract with Carry */
-    ALU_AND   =  4,     /* And */
-    ALU_OR    =  5,     /* Or */
-    ALU_XOR   =  6,     /* eXclusive Or */
-	ALU_SHIFT =  7,     /* SHIFT (right,left, rotate) */
+    ALU_RSUB  =  4,     /* Reverse SUBtract */
+    ALU_AND   =  5,     /* AND */
+    ALU_OR    =  6,     /* inclusive OR */
+	ALU_XOR   =  7,     /* eXclusive OR */
+
+	ALU_MUL   =  8,		/* MULtiply */
+	ALU_DIV   =  8,		/* reserved for DIV */
+	ALU_ASR   =  10,	/* Arithmetic Shift Right */
+	ALU_LSR   =  11,	/* Logical Shift Right */
+	ALU_CX    =  12,	/* reserved (CX) */
+	ALU_DX    =  13,	/* reserved (DX) */
+	LINK      =  14,	/* LINK Rd = PC */
+	LD_IMM    =  15,	/* LD IMM (upper 16-bits) */
 
 } NANO_ALU;
 
@@ -36,8 +46,8 @@ typedef enum
  */
 typedef enum
 {
-    COND_BNE,       /* Branch Not Equal */
-    COND_BEQ,       /* Branch EQual */
+	COND_BEQ,       /* Branch EQual */
+	COND_BNE,       /* Branch Not Equal */
     COND_BHI,       /* Branch HIgher */
     COND_BLS,       /* Branch Lower/Same */
     COND_BHS,       /* Branch Higher/Same */
@@ -46,12 +56,11 @@ typedef enum
     COND_BLE,       /* Branch if Less/Equal */
     COND_BGE,       /* Branch if Greater/Equal */
     COND_BLT,       /* Branch if Less Than */
-    COND_BRN,       /* BRnch Never */
     COND_BRA,       /* BRanch Always */
-    COND_BPL,       /* Branch if PLus */
-    COND_BMI,       /* Branch if MInus */
-    COND_JAL,       /* Jump And Link */
-    COND_REP,       /* Repeat Instruction */
+    COND_RET,       /* RETurn */
+    COND_BD,        /* Branch reserved D */
+    COND_BE,        /* Branch reserved E */
+    COND_BF,        /* Repeat reserved F */
 } BRANCH_COND;
 
 /*
@@ -72,22 +81,22 @@ typedef enum
  */
 typedef enum
 {
-    OPC_ADD_REG  = 0,
-    OPC_SUB_REG  = 1,
-	OPC_ADD_IMM  = 2,
-	OPC_SUB_IMM  = 3,
-	OPC_AND_IMM  = 4,
-	OPC_OR_IMM   = 5,
-	OPC_XOR_IMM  = 6,
-	OPC_USR1_IMM = 7,
-	OPC_USR2_IMM = 8,
-	OPC_USR3_IMM = 9,
+	OPC_ADD_IMM  = 0,
+	OPC_SUB_IMM  = 1,
+	OPC_ADC_IMM  = 2,
+	OPC_SBC_IMM  = 3,
+	OPC_RSUB_IMM = 4,
+	OPC_AND_IMM  = 5,
+	OPC_OR_IMM   = 6,
+	OPC_XOR_IMM  = 7,
+	OPC_08_IMM   = 8,
+	OPC_09_IMM   = 9,
 	OPC_ALU_REG  = 10,
 	OPC_BRANCH   = 11,
-	OPC_CALL     = 12,
-	OPC_LDST     = 13,
-	OPC_LEA_OFF  = 14,
-	OPC_PREFIX   = 15
+	OPC_REG_IMM  = 12,
+	OPC_LD       = 13,
+	OPC_ST       = 14,
+	OPC_IMM      = 15
 
 } NANO_OPC;
 
@@ -152,7 +161,7 @@ int MemWriteLong(NANO_ADDR addr, NANO_LONG data);
 void MemCopyBytes(NANO_ADDR addr, void* buf, int length);
 
 int NanoSimInst(NANO_CPU* p, NANO_STEP step);
-int NanoDisAsm(const NANO_ADDR addr, char* line);
+int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc);
 
 #ifdef __cplusplus
 }
