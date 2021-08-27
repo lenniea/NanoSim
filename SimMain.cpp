@@ -262,7 +262,6 @@ MyFrame::MyFrame()
     wxBoxSizer* horizSizer = new wxBoxSizer( wxHORIZONTAL );
 
 	m_memory = new MemListCtrl(p, NANO_MEM_WORDS);
-	NanoReset(&m_cpu);
 
     horizSizer->Add(m_memory, wxSizerFlags(1).Expand().Border(wxALL, 5));
     
@@ -324,6 +323,9 @@ MyFrame::MyFrame()
     // don't allow frame to get smaller than what the sizers tell it and also set
     // the initial size as calculated by the sizers
     topsizer->SetSizeHints( this );
+
+	NanoReset(&m_cpu);
+	UpdateView();
 }
 
 void MyFrame::OnFileNew(wxCommandEvent& WXUNUSED(event))

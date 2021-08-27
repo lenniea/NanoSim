@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #ifdef WIN32
+	#define WIN32_LEAN_AND_MEAN
     #include <windows.h>
     #define sprintf wsprintf
 #else
@@ -149,6 +150,9 @@ void NanoReset(NANO_CPU* p)
 {
     memset(p, 0, sizeof(NANO_CPU));
     p->prefix = NO_PREFIX;
+#if defined(_DEBUG)
+	p->ccr = NANO_N | NANO_C | NANO_V | NANO_Z;
+#endif
 }
 
 /* Macro to compute the sum of a+b+carry and return carry out */
