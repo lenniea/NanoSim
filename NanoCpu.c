@@ -494,6 +494,22 @@ char szRegName[16][4] =
     "r8",  "r9",  "r10", "r11", "r12", "r13", "sp",  "r15"
 };
 
+#ifdef _MSC_VER
+
+int SNPRINTF(char * str, size_t size, const char * format, ...)
+{
+	int retval;
+	va_list ap;
+	va_start(ap, format);
+	retval = _vsnprintf(str, size, format, ap);
+	va_end(ap);
+	return retval;
+}
+
+#else
+#defne SNPRINTF		snprintf
+#endif
+
 /*
  *  ===== NanoDisAsm =====
  *      Disassemble one instruction.  Note: prefixes are treated as
@@ -511,46 +527,46 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
     switch (GET_OPC(opc))
 	{
     case OPC_ADD_IMM:
-		length = sprintf_s(line, len, "add  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "add  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_SUB_IMM:
-		length = sprintf_s(line, len, "sub  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sub  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
 	case OPC_ADC_IMM:
-		length = sprintf_s(line, len, "adc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "adc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_SBC_IMM:
-		length = sprintf_s(line, len, "sbc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sbc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_RSUB_IMM:
-		length = sprintf_s(line, len, "rsub %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "rsub %s,#%u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_AND_IMM:
-		length = sprintf_s(line, len, "and  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "and  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_OR_IMM:
-		length = sprintf_s(line, len, "or   %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "or   %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_XOR_IMM:
-		length = sprintf_s(line, len, "xor  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "xor  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_ALU_REG:
-		length = sprintf_s(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
+		length = SNPRINTF(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_BRANCH:
-		length = sprintf_s(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
+		length = SNPRINTF(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
     case OPC_LD:
-		length = sprintf_s(line, len, "ld  %s,[%s]", szRegName[Rx], szRegName[Ry]);
+		length = SNPRINTF(line, len, "ld  %s,[%s]", szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_ST:
-		length = sprintf_s(line, len, "st  %s,%u[sp]", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "st  %s,%u[sp]", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_IMM:
-		length = sprintf_s(line, len, "imm #%04x", OPC_IMM12(opc));
+		length = SNPRINTF(line, len, "imm #%04x", OPC_IMM12(opc));
         break;
     default:
-		length = sprintf_s(line, len, "%04x???", opc);
+		length = SNPRINTF(line, len, "%04x???", opc);
         break;
     }
     return length;
