@@ -3,9 +3,9 @@ OBJ = o
 CXX = $(shell wx-config --cxx)
 CC = $(shell wx-config --cc)
 
-PROGRAM = NanoSim.$(EXE)
+PROGRAM = NanoSim$(EXE)
 
-OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ)
+OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ) NanoMem.$(OBJ)
 
 # implementation
 
@@ -20,7 +20,7 @@ OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ)
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --libs`
+	$(CXX) -o $(PROGRAM)$(EXE) $(OBJECTS) `wx-config --libs`
 
 clean:
 	rm -f *.$(OBJ) $(PROGRAM)

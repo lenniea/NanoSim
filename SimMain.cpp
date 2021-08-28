@@ -200,7 +200,7 @@ EVT_MENU(ID_FILE_EXIT, MyFrame::OnQuit)
 
 wxEND_EVENT_TABLE()
 
-const char* szRegName[18] =
+const char* szRegNameCaps[18] =
 {
 	"R0", "R1", "R2", "R3",
 	"R4", "R5", "R6", "R7",
@@ -273,7 +273,7 @@ MyFrame::MyFrame()
 		for (int r = 0; r < 9; ++r) {
             int id = c * 9 + r;
 			// Create static text label to left of value
-            gridsizer->Add(new wxStaticText(p, wxID_ANY, szRegName[id]),
+            gridsizer->Add(new wxStaticText(p, wxID_ANY, szRegNameCaps[id]),
                 wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
 			long style = wxBORDER | wxALIGN_CENTER_HORIZONTAL;
 			if (id >= ID_IMM) {
