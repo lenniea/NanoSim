@@ -131,14 +131,14 @@ wxListView(parent, wxID_ANY, wxDefaultPosition, wxSize(200, 100), wxLC_REPORT | 
 
 //Overload virtual method of wxListView to provide text data for virtual list
 wxString MemListCtrl::OnGetItemText(long item, long column) const {
-	wxString str = "";
+	wxString str;
 	char szDisAsm[40];
 	NANO_ADDR addr = item * 2;
 	NANO_INST opc;
 	MemReadWord(addr, &opc);
 	switch (column) {
 	case 0:
-		str = str.Format(_("%04x"), item * 2);
+		str = str.Format(_("%04x"), addr);
 		break;
 	case 1:
 		str = str.Format(_("%04x"), opc);
