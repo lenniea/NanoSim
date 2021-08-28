@@ -109,14 +109,14 @@ wxListView(parent, wxID_ANY, wxDefaultPosition, wxSize(200, 100), wxLC_REPORT | 
 	wxListItem col0;
 	col0.SetId(0);
 	col0.SetText(_T("Addr"));
-	col0.SetWidth(40);
+	col0.SetWidth(50);
 	InsertColumn(0, col0);
 
 	// Add second column 
 	wxListItem col1;
 	col1.SetId(1);
 	col1.SetText(_T("Data"));
-	col1.SetWidth(40);
+	col1.SetWidth(50);
 	InsertColumn(1, col1);
 
 	// Add third column      
@@ -167,7 +167,7 @@ bool MyApp::OnInit()
 
   // Create the main frame window
   MyFrame *frame = new MyFrame;
-  frame->SetMinClientSize(wxSize(500, 350));
+  frame->SetMinClientSize(wxSize(550, 350));
 
   frame->Show(true);
 
@@ -329,13 +329,40 @@ MyFrame::MyFrame()
 	UpdateView();
 }
 
+void NanoFillMemory(int incr)
+{
+	for (NANO_ADDR i = 0; i < NANO_MEM_WORDS; ++i)
+	{
+		NANO_ADDR addr = i * 2;
+		MemWriteWord(addr, i * incr);
+	}
+}
+
 void MyFrame::OnFileNew(wxCommandEvent& WXUNUSED(event))
 {
-	for (NANO_ADDR a = 0; a < NANO_MEM_WORDS; ++a)
-	{
-		MemWriteWord(a * 2, a * 17);
-	}
+	NanoFillMemory(17);
 	Refresh();
+}
+
+// Parse single hex word on a line
+int atohex(const char* buffer, int n)
+{
+	int hex = 0;
+	for (int i = 0; i < n; ++i)
+	{
+		char ch = buffer[i];
+		if (ch == '\n' || ch == '\r' || ch == ' ' || ch == '\0')
+			break;
+		else if (ch >= '0' && ch <= '9')
+			hex = hex * 16 + ch - '0';
+		else if (ch >= 'a' && ch <= 'f')
+			hex = hex * 16 + ch - 'a' + 10;
+		else if (ch >= 'A' && ch <= 'F')
+			hex = hex * 16 + ch - 'A' + 10;
+		else
+			return -1;
+	}
+	return hex;
 }
 
 void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
@@ -349,9 +376,10 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 	if (dialog->ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
 	{
 		wxString path = dialog->GetPath();
+		NanoFillMemory(0);
+		NANO_ADDR addr = 0;
 		if (path.EndsWith(".bin"))
 		{
-			NANO_ADDR addr = 0;
 			FILE* fp = fopen(path, "rb");
 			if (fp != NULL)
 			{
@@ -362,15 +390,41 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 					words = fread(buffer, sizeof(NANO_WORD), 256, fp);
 					for (int i = 0; i < words; ++i)
 					{
-						MemWriteWord(addr++, buffer[i]);
+						MemWriteWord(addr, buffer[i]);
+						addr += 2;
 					}
 				} while (words > 0 && addr < NANO_MEM_WORDS);
+				fclose(fp);
+				Refresh();
+			}
+		}
+		else if (path.EndsWith(".hex"))
+		{
+			FILE* fp = fopen(path, "r");
+			if (fp != NULL)
+			{
+				do
+				{
+					char buffer[256];
+					if (fgets(buffer, 256, fp) == NULL)
+						break;
+
+					int i = atohex(buffer, 256);
+					if (i < 0)
+					{
+						wxString str = str.Format("Error parsing hex at addr %04X", addr);
+						wxMessageBox(str, "ERROR", wxOK | wxCENTRE | wxICON_ERROR);
+					}
+					MemWriteWord(addr, (NANO_WORD)i);
+					addr += 2;
+				} while (addr < NANO_MEM_WORDS);
+				fclose(fp);
 				Refresh();
 			}
 		}
 		else
 		{
-			wxMessageBox(".hex files not yet implemented", "ERROR", wxOK | wxCENTRE | wxICON_ERROR);
+			wxMessageBox("Unknown file extension", "ERROR", wxOK | wxCENTRE | wxICON_ERROR);
 		}
 	}
 
