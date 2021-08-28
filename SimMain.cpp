@@ -17,7 +17,9 @@
 #include "NanoCpu.h"
 #include <assert.h>
 
-#define NANO_MEM_WORDS	32768		// Full 32K x 16 (64K Bytes)
+#define NANO_MEM_WORDS	32768		// 32K x 16 (64K Bytes) of Memory
+#define NANO_RAM_WORDS	24576		// 24K x 16 (48K Bytes) of RAM
+
 
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -334,7 +336,7 @@ MyFrame::MyFrame()
 
 void NanoFillMemory(int incr)
 {
-	for (NANO_ADDR i = 0; i < NANO_MEM_WORDS; ++i)
+	for (NANO_ADDR i = 0; i < NANO_RAM_WORDS; ++i)
 	{
 		NANO_ADDR addr = i * 2;
 		MemWriteWord(addr, i * incr);
@@ -439,7 +441,7 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 						MemWriteWord(addr, buffer[i]);
 						addr += 2;
 					}
-				} while (words > 0 && addr < NANO_MEM_WORDS);
+				} while (words > 0 && addr < NANO_RAM_WORDS);
 				fclose(fp);
 				Refresh();
 			}
@@ -463,7 +465,7 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 					}
 					MemWriteWord(addr, (NANO_WORD)i);
 					addr += 2;
-				} while (addr < NANO_MEM_WORDS);
+				} while (addr < NANO_RAM_WORDS);
 				fclose(fp);
 				Refresh();
 			}
