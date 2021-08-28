@@ -8,12 +8,16 @@ NANO_WORD sw_inp = 0xFF;
 NANO_SHORT memory[MEM_WORDS];
 
 #define ILLEGAL_ADDR(a)     (((a) & 1) || (a >= MEM_WORDS * 2))
+#define IO_ADDR(a)			(((a) & 0xC000) == 0xC000)
 
 int MemReadWord(NANO_ADDR addr, NANO_SHORT* data)
 {
 	if (ILLEGAL_ADDR(addr))
 		return -1;
-	*data = memory[addr >> 1];
+	if (IO_ADDR(addr))
+		*data = InpReadWord(addr);
+	else
+		*data = memory[addr >> 1];
 	return 1;
 }
 
@@ -34,7 +38,10 @@ int MemWriteWord(NANO_ADDR addr, NANO_SHORT data)
 {
 	if (ILLEGAL_ADDR(addr))
 		return -1;
-	memory[addr >> 1] = data;
+	if (IO_ADDR(addr))
+		OutWriteWord(addr, data);
+	else
+		memory[addr >> 1] = data;
 	return 1;
 }
 

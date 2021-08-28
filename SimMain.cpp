@@ -227,6 +227,8 @@ wxMenu* wxMakeMenu(MENU_ITEM* pMenu, int count)
 	return menu;
 }
 
+MyFrame* myFrame = NULL;
+
 // Define my frame constructor
 MyFrame::MyFrame()
        : wxFrame(NULL, wxID_ANY, "Nano CPU Simulator")
@@ -303,7 +305,7 @@ MyFrame::MyFrame()
 	}
 	topsizer->Add(iosizer, wxSizerFlags(1).Border(wxLEFT | wxRIGHT, 5));
 
-    wxTextCtrl* logger = new wxTextCtrl(p, wxID_ANY, "Log.",
+    wxTextCtrl* logger = new wxTextCtrl(p, wxID_ANY, "",
                                  wxDefaultPosition, wxSize(400, 400),
                                  wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
 
@@ -326,6 +328,7 @@ MyFrame::MyFrame()
     topsizer->SetSizeHints( this );
 
 	NanoReset(&m_cpu);
+	myFrame = this;
 	UpdateView();
 }
 
@@ -364,6 +367,47 @@ int atohex(const char* buffer, int n)
 			return -1;
 	}
 	return hex;
+}
+
+#define IO_CHECKBOXES	0xE000
+
+extern "C" void OutWriteWord(NANO_ADDR addr, NANO_SHORT word)
+{
+	if (myFrame != NULL)
+	{
+		switch (addr & 0xF000)
+		{
+		case IO_CHECKBOXES:
+			for (int i = 0; i < 16; ++i)
+			{
+				bool state = (word & (1 << i)) ? true : false;
+				myFrame->m_iobox[i]->SetValue(state);
+			}
+			break;
+		default:
+			;
+		}
+	}
+}
+
+extern "C" NANO_WORD InpReadWord(NANO_ADDR addr)
+{
+	NANO_WORD w = 0;
+	int i;
+	if (myFrame != NULL)
+	{
+		switch (addr & 0xF000)
+		{
+		case IO_CHECKBOXES:
+			for (i = 0; i < 16; ++i) {
+				if (myFrame->m_iobox[i]->IsChecked()) w |= (1 << i);
+			}
+			break;
+		default:
+			w = 0xDEAD;
+		}
+	}
+	return w;
 }
 
 void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))

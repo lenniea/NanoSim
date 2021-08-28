@@ -64,19 +64,6 @@ typedef enum
 } BRANCH_COND;
 
 /*
- *  Load/Store field(s)
- */
-typedef enum
-{
-	OPC_BYTE = 0,
-	OPC_WORD = 1,
-	OPC_LONG = 2,
-	OPC_SIZE_MASK = 3,
-
-	OPC_LDST_BIT = 4
-} OPC_SIZE;
-	
-/*
  *  4-bit "opcode" field
  */
 typedef enum
@@ -89,13 +76,13 @@ typedef enum
 	OPC_AND_IMM  = 5,
 	OPC_OR_IMM   = 6,
 	OPC_XOR_IMM  = 7,
-	OPC_08_IMM   = 8,
-	OPC_09_IMM   = 9,
+	OPC_LB_OFF   = 8,
+	OPC_SB_OFF   = 9,
 	OPC_ALU_REG  = 10,
 	OPC_BRANCH   = 11,
 	OPC_REG_IMM  = 12,
-	OPC_LD       = 13,
-	OPC_ST       = 14,
+	OPC_LW_OFF   = 13,
+	OPC_SW_OFF    = 14,
 	OPC_IMM      = 15
 
 } NANO_OPC;
@@ -159,6 +146,10 @@ int MemReadLong(NANO_ADDR addr, NANO_LONG* data);
 int MemWriteWord(NANO_ADDR addr, NANO_SHORT data);
 int MemWriteLong(NANO_ADDR addr, NANO_LONG data);
 void MemCopyBytes(NANO_ADDR addr, void* buf, int length);
+
+// Implemented by Simulator
+void OutWriteWord(NANO_ADDR addr, NANO_SHORT data);
+NANO_SHORT InpReadWord(NANO_ADDR addr);
 
 int NanoSimInst(NANO_CPU* p, NANO_STEP step);
 int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc);

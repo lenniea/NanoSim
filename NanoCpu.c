@@ -413,8 +413,17 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
             NanoAluOp(p, Rz, Rx, p->reg[Rx], Ry);
             p->prefix = NO_PREFIX;
             break;
-        case OPC_LD:
-            addr = p->reg[Rx] + OPC_OFF4(opc);
+		case OPC_LB_OFF:
+			addr = p->reg[Ry] + OPC_OFF4(opc)*2;
+			data = NanoLoadByte(p, addr);
+			break;
+		case OPC_SB_OFF:
+			addr = p->reg[Ry] + OPC_OFF4(opc);
+			data = p->reg[Rx];
+			NanoStoreByte(p, addr, data);
+			break;
+		case OPC_LW_OFF:
+			addr = p->reg[Ry] + OPC_OFF4(opc);
 			if (addr & 1)
 			{
 				// Load Byte
@@ -426,8 +435,9 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 				break;
 			}
 			break;
-		case OPC_ST:
-			addr = p->reg[Rx] + OPC_OFF4(opc);
+		case OPC_SW_OFF:
+			addr = p->reg[Ry] + OPC_OFF4(opc)*2;
+			data = p->reg[Rx];
 			if (addr & 1)
 			{
 				NanoStoreByte(p, addr, data);
@@ -537,17 +547,23 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
     case OPC_XOR_IMM:
 		length = SNPRINTF(line, len, "xor  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
         break;
-    case OPC_ALU_REG:
+	case OPC_LB_OFF:
+		length = SNPRINTF(line, len, "lb  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc), szRegName[Ry]);
+		break;
+	case OPC_SB_OFF:
+		length = SNPRINTF(line, len, "sb  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc), szRegName[Ry]);
+		break;
+	case OPC_ALU_REG:
 		length = SNPRINTF(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_BRANCH:
 		length = SNPRINTF(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
-    case OPC_LD:
-		length = SNPRINTF(line, len, "ld  %s,[%s]", szRegName[Rx], szRegName[Ry]);
+	case OPC_LW_OFF:
+		length = SNPRINTF(line, len, "lw  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc)*2, szRegName[Ry]);
         break;
-    case OPC_ST:
-		length = SNPRINTF(line, len, "st  %s,%u[sp]", szRegName[Rx], OPC_IMM8(opc));
+    case OPC_SW_OFF:
+		length = SNPRINTF(line, len, "sw  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc)*2, szRegName[Ry]);
         break;
     case OPC_IMM:
 		length = SNPRINTF(line, len, "imm #%04x", OPC_IMM12(opc));

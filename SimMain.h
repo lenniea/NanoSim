@@ -37,6 +37,8 @@ public:
 	wxString OnGetItemText(long item, long column) const;
 };
 
+extern class MyFrame* myFrame;
+
 // the main frame class
 class MyFrame : public wxFrame
 {
@@ -55,11 +57,11 @@ public:
 	// Help Menu
 	void OnAbout(wxCommandEvent& event);
     void OnQuit(wxCommandEvent& event);
-
-private:
-	NANO_CPU m_cpu;
+public:
 	MemListCtrl* m_memory;
 	wxTextCtrl* m_register[REGS];
 	wxCheckBox* m_iobox[16];
+private:
+	NANO_CPU m_cpu;
     wxDECLARE_EVENT_TABLE();
 };
