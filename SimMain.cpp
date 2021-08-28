@@ -167,7 +167,7 @@ bool MyApp::OnInit()
 
   // Create the main frame window
   MyFrame *frame = new MyFrame;
-  frame->SetMinClientSize(wxSize(500, 400));
+  frame->SetMinClientSize(wxSize(500, 350));
 
   frame->Show(true);
 
@@ -301,10 +301,10 @@ MyFrame::MyFrame()
 		m_iobox[i] = new wxCheckBox(p, wxID_CHECK_INP0 + i, szCheckName);
 		iosizer->Add(m_iobox[i]);
 	}
-	topsizer->Add(iosizer, wxSizerFlags(1).Expand().Border(wxBOTTOM | wxLEFT | wxRIGHT, 5));
+	topsizer->Add(iosizer, wxSizerFlags(1).Border(wxLEFT | wxRIGHT, 5));
 
     wxTextCtrl* logger = new wxTextCtrl(p, wxID_ANY, "Log.",
-                                 wxDefaultPosition, wxDefaultSize,
+                                 wxDefaultPosition, wxSize(400, 400),
                                  wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
 
 	topsizer->Add(logger, wxSizerFlags(1).Proportion(1).Expand().Border(wxALL, 5));
