@@ -31,7 +31,7 @@
 #include "SimMain.h"
 
 #ifndef wxHAS_IMAGES_IN_RESOURCES
-    #include "../sample.xpm"
+    #include "res/NanoSim.xpm"
 #endif
 
 typedef struct menu_res
@@ -199,13 +199,13 @@ EVT_MENU(ID_FILE_EXIT, MyFrame::OnQuit)
 
 wxEND_EVENT_TABLE()
 
-const TCHAR* szRegName[18] =
+const char* szRegName[18] =
 {
-	_T("R0"), _T("R1"), _T("R2"), _T("R3"),
-	_T("R4"), _T("R5"), _T("R6"), _T("R7"),
-	_T("R8"), _T("R9"), _T("R10"), _T("R11"),
-	_T("R12"), _T("R13"), _T("R14"), _T("SP"),
-	_T("PFX"), _T("CCR")
+	"R0", "R1", "R2", "R3",
+	"R4", "R5", "R6", "R7",
+	"R8", "R9", "R10", "R11",
+	"R12", "R13", "R14", "SP",
+	"PFX", "CCR"
 };
 
 wxMenu* wxMakeMenu(MENU_ITEM* pMenu, int count)

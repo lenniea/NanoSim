@@ -3,17 +3,17 @@
 #ifndef __NANOCPU_H__
 #define __NANOCPU_H__
 
-#include <tchar.h>
+#include <stdlib.h>			// for size_t
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define NANO_FUNC           12
-#define NANO_RX             8
-#define NANO_RY             4
-#define NANO_RZ             0
+#define NANO_FUNC		12
+#define NANO_RX			8
+#define NANO_RY			4
+#define NANO_RZ			0
 
 /*
  *  Arithmetic Logic Unit
@@ -21,14 +21,14 @@ extern "C"
 
 typedef enum
 {
-    ALU_ADD   =  0,     /* ADD */
-    ALU_SUB   =  1,     /* SUBtract */
-    ALU_ADC   =  2,     /* Add with Carry */
-    ALU_SBC   =  3,     /* SuBtract with Carry */
-    ALU_RSUB  =  4,     /* Reverse SUBtract */
-    ALU_AND   =  5,     /* AND */
-    ALU_OR    =  6,     /* inclusive OR */
-	ALU_XOR   =  7,     /* eXclusive OR */
+	ALU_ADD   =  0,		/* ADD */
+	ALU_SUB   =  1,		/* SUBtract */
+	ALU_ADC   =  2,		/* Add with Carry */
+	ALU_SBC   =  3,		/* SuBtract with Carry */
+	ALU_RSUB  =  4,		/* Reverse SUBtract */
+	ALU_AND   =  5,		/* AND */
+	ALU_OR    =  6,		/* inclusive OR */
+	ALU_XOR   =  7,		/* eXclusive OR */
 
 	ALU_MUL   =  8,		/* MULtiply */
 	ALU_DIV   =  8,		/* reserved for DIV */
@@ -46,21 +46,21 @@ typedef enum
  */
 typedef enum
 {
-	COND_BEQ,       /* Branch EQual */
-	COND_BNE,       /* Branch Not Equal */
-    COND_BHI,       /* Branch HIgher */
-    COND_BLS,       /* Branch Lower/Same */
-    COND_BHS,       /* Branch Higher/Same */
-    COND_BLO,       /* Branch LOwer */
-    COND_BGT,       /* Branch if Greater Than */
-    COND_BLE,       /* Branch if Less/Equal */
-    COND_BGE,       /* Branch if Greater/Equal */
-    COND_BLT,       /* Branch if Less Than */
-    COND_BRA,       /* BRanch Always */
-    COND_RET,       /* RETurn */
-    COND_BD,        /* Branch reserved D */
-    COND_BE,        /* Branch reserved E */
-    COND_BF,        /* Repeat reserved F */
+	COND_BEQ,		/* Branch EQual */
+	COND_BNE,		/* Branch Not Equal */
+	COND_BHI,		/* Branch HIgher */
+	COND_BLS,		/* Branch Lower/Same */
+	COND_BHS,		/* Branch Higher/Same */
+	COND_BLO,		/* Branch LOwer */
+	COND_BGT,		/* Branch if Greater Than */
+	COND_BLE,		/* Branch if Less/Equal */
+	COND_BGE,		/* Branch if Greater/Equal */
+	COND_BLT,		/* Branch if Less Than */
+	COND_BRA,		/* BRanch Always */
+	COND_RET,		/* RETurn */
+	COND_BD,		/* Branch reserved D */
+	COND_BE,		/* Branch reserved E */
+	COND_BF,		/* Repeat reserved F */
 } BRANCH_COND;
 
 /*
@@ -68,9 +68,9 @@ typedef enum
  */
 typedef enum
 {
-    OPC_BYTE = 0,
-    OPC_WORD = 1,
-    OPC_LONG = 2,
+	OPC_BYTE = 0,
+	OPC_WORD = 1,
+	OPC_LONG = 2,
 	OPC_SIZE_MASK = 3,
 
 	OPC_LDST_BIT = 4
@@ -110,43 +110,43 @@ typedef unsigned long  NANO_LONG;
 typedef unsigned long  NANO_TIME;
 
 #ifdef _NANO32
-    typedef signed   long NANO_SWORD;
-    typedef unsigned long NANO_WORD;
-    typedef unsigned long NANO_ADDR;
+	typedef signed   long NANO_SWORD;
+	typedef unsigned long NANO_WORD;
+	typedef unsigned long NANO_ADDR;
 	typedef __int64       NANO_DWORD;
 	#define NANO_BITS	32
-    #define NANO_MSB    0x80000000L
-    #define NANO_SZADDR "%08x"
+	#define NANO_MSB    0x80000000L
+	#define NANO_SZADDR "%08x"
 #else
-    typedef signed   short NANO_SWORD;
-    typedef unsigned short NANO_WORD;
-    typedef unsigned short NANO_ADDR;
+	typedef signed   short NANO_SWORD;
+	typedef unsigned short NANO_WORD;
+	typedef unsigned short NANO_ADDR;
 	typedef long           NANO_DWORD;
+	#define NANO_SZADDR "%08x"
 	#define NANO_BITS	16
-    #define NANO_MSB    0x8000
-    #define NANO_SZADDR "%04x"
+	#define NANO_MSB    0x8000
 #endif
 
-#define NANO_N      0x0001
-#define NANO_C      0x0002
-#define NANO_V      0x0004
-#define NANO_Z      0x0008
+#define NANO_N		0x0001
+#define NANO_C		0x0002
+#define NANO_V		0x0004
+#define NANO_Z		0x0008
 
 typedef struct
 {
-    NANO_WORD reg[16];
-    NANO_ADDR pc;
+	NANO_WORD reg[16];
+	NANO_ADDR pc;
 	NANO_WORD temp;
-    NANO_WORD prefix;
-    NANO_TIME cycles;
-    NANO_WORD ccr;
+	NANO_WORD prefix;
+	NANO_TIME cycles;
+	NANO_WORD ccr;
 
-    NANO_ADDR breakpoint;
+	NANO_ADDR breakpoint;
 } NANO_CPU;
 
 typedef enum
 {
-    NANO_STEP_OVER, NANO_STEP_OUT, NANO_STEP_INTO
+	NANO_STEP_OVER, NANO_STEP_OUT, NANO_STEP_INTO
 } NANO_STEP;
 
 void NanoReset(NANO_CPU* pCpu);
