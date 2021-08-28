@@ -3,14 +3,7 @@
  * All Rights Reserved.
  */
 
-#include <stdio.h>
-#ifdef WIN32
-	#define WIN32_LEAN_AND_MEAN
-    #include <windows.h>
-    #define sprintf wsprintf
-#else
-    #include <stdio.h>
-#endif
+#include <stdio.h>		// for SNPRINTF
 #include <stdlib.h>
 #include <assert.h>
 #include <memory.h>
@@ -495,19 +488,9 @@ char szRegName[16][4] =
 };
 
 #ifdef _MSC_VER
-
-int SNPRINTF(char * str, size_t size, const char * format, ...)
-{
-	int retval;
-	va_list ap;
-	va_start(ap, format);
-	retval = _vsnprintf(str, size, format, ap);
-	va_end(ap);
-	return retval;
-}
-
+#define SNPRINTF	_snprintf
 #else
-#defne SNPRINTF		snprintf
+#define SNPRINTF	snprintf
 #endif
 
 /*
