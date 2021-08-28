@@ -1,6 +1,7 @@
 EXE = 
 OBJ = o
 CXX = $(shell wx-config --cxx)
+CC = $(shell wx-config --cc)
 
 PROGRAM = NanoSim.$(EXE)
 
@@ -12,6 +13,9 @@ OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ)
 
 .cpp.$(OBJ) :
 	$(CXX) -c `wx-config --cxxflags` -o $@ $<
+
+.c.$(OBJ) :
+	$(CC) -c `wx-config --cxxflags` -o $@ $<
 
 all: $(PROGRAM)
 
