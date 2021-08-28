@@ -10,6 +10,10 @@
 
 #include "NanoCpu.h"
 
+#ifndef wxOVERRIDE
+#define wxOVERRIDE	virtual
+#endif
+
 // Define a new application
 class MyApp: public wxApp
 {

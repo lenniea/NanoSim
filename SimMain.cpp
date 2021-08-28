@@ -270,7 +270,7 @@ MyFrame::MyFrame()
 
 	for (int c = 0; c < 2; ++c) {
 		for (int r = 0; r < 9; ++r) {
-            TCHAR id = c * 9 + r;
+            int id = c * 9 + r;
 			// Create static text label to left of value
             gridsizer->Add(new wxStaticText(p, wxID_ANY, szRegName[id]),
                 wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
@@ -294,7 +294,7 @@ MyFrame::MyFrame()
 	// Create I/O checkboxes
 	for (int i = 0; i < 16; ++i)
 	{
-		TCHAR szCheckName[10];
+		char szCheckName[10];
 		szCheckName[0] = (i < 10) ? i + '0' : 'A' + i - 10;
 		szCheckName[1] = '\0';
 		m_iobox[i] = new wxCheckBox(p, wxID_CHECK_INP0 + i, szCheckName);
