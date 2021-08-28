@@ -341,6 +341,7 @@ void NanoFillMemory(int incr)
 void MyFrame::OnFileNew(wxCommandEvent& WXUNUSED(event))
 {
 	NanoFillMemory(17);
+	NanoReset(&m_cpu);
 	Refresh();
 }
 
@@ -377,6 +378,7 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 	{
 		wxString path = dialog->GetPath();
 		NanoFillMemory(0);
+		NanoReset(&m_cpu);
 		NANO_ADDR addr = 0;
 		if (path.EndsWith(".bin"))
 		{

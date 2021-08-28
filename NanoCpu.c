@@ -178,6 +178,10 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rx, NANO_WORD a, NANO_WORD b)
         carry = !carry;
         WRITE_REG(p, Rx, result);
         break;
+	case ALU_RSUB:
+		result = b - a;
+		WRITE_REG(p, Rx, result);
+		break;
     case ALU_AND:   /* And */
         result = a & b;
         WRITE_REG(p, Rx, result);
@@ -337,7 +341,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
         NANO_INST opc;
         NANO_ADDR addr;
         NANO_WORD data;
-        int Rx,Ry;
+        int Rx,Ry,Rz;
 
         int cycles = MemReadWord(p->pc, &opc);
         p->cycles += cycles;
@@ -347,7 +351,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 		/* Decode (register) fields */
 		Rx = OPC_RX(opc);
 		Ry = OPC_RY(opc);
-		Ry = OPC_RZ(opc);
+		Rz = OPC_RZ(opc);
 
         switch (GET_OPC(opc))
 		{
@@ -406,7 +410,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
             p->prefix = NO_PREFIX;
             break;
         case OPC_ALU_REG:
-            NanoAluOp(p, Rx, Rx, p->reg[Rx], Ry);
+            NanoAluOp(p, Rz, Rx, p->reg[Rx], Ry);
             p->prefix = NO_PREFIX;
             break;
         case OPC_LD:
