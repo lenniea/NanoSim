@@ -351,9 +351,9 @@ void MyFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 		wxString path = dialog->GetPath();
 		if (path.EndsWith(".bin"))
 		{
-			FILE* fp;
 			NANO_ADDR addr = 0;
-			if (fopen_s(&fp, path, "rb") == 0)
+			FILE* fp = fopen(path, "rb");
+			if (fp != NULL)
 			{
 				int words;
 				do
