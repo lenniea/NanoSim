@@ -256,9 +256,9 @@ static int InstLength(NANO_ADDR addr)
     return length;
 }
 
-BOOL NanoTestCond(NANO_CPU* p, int cond)
+int NanoTestCond(NANO_CPU* p, int cond)
 {
-    BOOL br;
+    int br;
     int data;
 
     switch (cond)
@@ -302,10 +302,10 @@ BOOL NanoTestCond(NANO_CPU* p, int cond)
         break;
 	case COND_RET:
 		// TODO: implement RETurn
-		br = TRUE;
+		br = 1;
 		break;
     default:
-        br = FALSE;
+        br = 0;
     }
     return br;
 }
