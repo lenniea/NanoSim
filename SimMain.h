@@ -11,7 +11,7 @@
 #include "NanoCpu.h"
 
 #ifndef wxOVERRIDE
-#define wxOVERRIDE	virtual
+#define wxOVERRIDE
 #endif
 
 // Define a new application

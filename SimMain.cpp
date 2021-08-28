@@ -15,6 +15,7 @@
 #include "wx/wxprec.h"
 
 #include "NanoCpu.h"
+#include <assert.h>
 
 #define NANO_MEM_WORDS	32768		// Full 32K x 16 (64K Bytes)
 
@@ -147,7 +148,7 @@ wxString MemListCtrl::OnGetItemText(long item, long column) const {
 		str = str.FromAscii(szDisAsm);
 		break;
 	default:
-		OutputDebugString(_T("Invalid column"));
+		assert("Invalid column");
 	}
 	return str;
 }
