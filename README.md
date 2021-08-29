@@ -1,8 +1,8 @@
 # NanoSim
 Cross Platform (Windows, Linux & Mac) Simulator for Nano FPGA CPU written in wxWidgets 3.X:
 
-![alt text](https://github.com/lenniea/NanoSim/raw/master/Doc/Screenshot.png "Screenshot")
+![Windows](https://github.com/lenniea/NanoSim/raw/master/Doc/Screenshot.png "Windows Screenshot")
 
-![alt text](https://github.com/lenniea/NanoSim/raw/master/Doc/Linux.png "Screenshot")
+![Linux](https://github.com/lenniea/NanoSim/raw/master/Doc/Linux.png "Linux Screenshot")
 
-![alt text](https://github.com/lenniea/NanoSim/raw/master/Doc/MacOSX.png "Screenshot")
+![Mac OSX](https://github.com/lenniea/NanoSim/raw/master/Doc/MacOSX.png "Mac OSX Screenshot")
