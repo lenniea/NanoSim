@@ -307,11 +307,11 @@ MyFrame::MyFrame()
 	}
 	topsizer->Add(iosizer, wxSizerFlags(1).Border(wxLEFT | wxRIGHT, 5));
 
-    wxTextCtrl* logger = new wxTextCtrl(p, wxID_ANY, "",
-                                 wxDefaultPosition, wxSize(400, 400),
-                                 wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
+    m_log = new wxTextCtrl(p, wxID_ANY, "",
+         wxDefaultPosition, wxSize(400, 400),
+         wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
 
-	topsizer->Add(logger, wxSizerFlags(1).Proportion(1).Expand().Border(wxALL, 5));
+	topsizer->Add(m_log, wxSizerFlags(1).Proportion(1).Expand().Border(wxALL, 5));
 
 #if wxUSE_STATLINE
     // 3) middle: create wxStaticLine with minimum size (3x3)
@@ -371,7 +371,9 @@ int atohex(const char* buffer, int n)
 	return hex;
 }
 
-#define IO_CHECKBOXES	0xE000
+#define UART_STATUS	0xC000
+#define UART_DATA	0xD000
+#define GPIO_PORT	0xE000
 
 extern "C" void OutWriteWord(NANO_ADDR addr, NANO_SHORT word)
 {
@@ -379,13 +381,15 @@ extern "C" void OutWriteWord(NANO_ADDR addr, NANO_SHORT word)
 	{
 		switch (addr & 0xF000)
 		{
-		case IO_CHECKBOXES:
+		case GPIO_PORT:
 			for (int i = 0; i < 16; ++i)
 			{
 				bool state = (word & (1 << i)) ? true : false;
 				myFrame->m_iobox[i]->SetValue(state);
 			}
 			break;
+		case UART_DATA:
+			myFrame->m_log->AppendText((char) word);
 		default:
 			;
 		}
@@ -400,7 +404,7 @@ extern "C" NANO_WORD InpReadWord(NANO_ADDR addr)
 	{
 		switch (addr & 0xF000)
 		{
-		case IO_CHECKBOXES:
+		case GPIO_PORT:
 			for (i = 0; i < 16; ++i) {
 				if (myFrame->m_iobox[i]->IsChecked()) w |= (1 << i);
 			}

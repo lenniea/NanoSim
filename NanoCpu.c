@@ -84,8 +84,10 @@ NANO_WORD NanoLoadByte(NANO_CPU* p, NANO_ADDR addr)
 {
     NANO_SHORT data;
     int cycles = MemReadWord(addr & ~1, &data);
-	if (addr & 1)
-		data = data >> 8;
+	if ((addr & 1) == 0)
+		data = data << 8;
+	// Sign extend into lower 8 bits
+	data = (signed short)data >> 8;
     p->cycles += cycles;
     return data;
 }
@@ -111,7 +113,7 @@ NANO_LONG NanoLoadLong(NANO_CPU* p, NANO_ADDR addr)
 /* Store byte at addr. */
 void NanoStoreByte(NANO_CPU* p, NANO_ADDR addr, NANO_SHORT data)
 {
-    int cycles = MemWriteWord(addr, data);
+    int cycles = MemWriteByte(addr, data);
     p->cycles += cycles;
 }
 
@@ -233,6 +235,8 @@ void NanoAluOp(NANO_CPU* p, NANO_ALU alu, int Rx, NANO_WORD a, NANO_WORD b)
 
     if (carry)
         cond |= NANO_C;
+	// Update condition codes
+	p->ccr = cond;
 }
 
 /* Local function to find length of instruction */
@@ -416,11 +420,18 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 		case OPC_LB_OFF:
 			addr = p->reg[Ry] + OPC_OFF4(opc)*2;
 			data = NanoLoadByte(p, addr);
+			WRITE_REG(p, Rx, data);
 			break;
 		case OPC_SB_OFF:
 			addr = p->reg[Ry] + OPC_OFF4(opc);
 			data = p->reg[Rx];
 			NanoStoreByte(p, addr, data);
+			break;
+		case OPC_MOV_IMM:
+			p->ccr &= ~NANO_C; // Clear CARRY
+			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+			WRITE_REG(p, Rx, data);
+			p->prefix = NO_PREFIX;
 			break;
 		case OPC_LW_OFF:
 			addr = p->reg[Ry] + OPC_OFF4(opc);
@@ -432,8 +443,8 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 			else
 			{
 				data = NanoLoadWord(p, addr);
-				break;
 			}
+			WRITE_REG(p, Rx, data);
 			break;
 		case OPC_SW_OFF:
 			addr = p->reg[Ry] + OPC_OFF4(opc)*2;
@@ -451,7 +462,7 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 		{
             int br = NanoTestCond(p, OPC_COND(opc));
             if (br) {
-                p->pc += 2*SIGN_EXT(opc, BIT8);
+                p->pc += 2*SIGN_EXT(OPC_IMM8(opc), 0x80);
                 p->cycles += 2;
             }
             break;
@@ -559,6 +570,9 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
     case OPC_BRANCH:
 		length = SNPRINTF(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
+	case OPC_MOV_IMM:
+		length = SNPRINTF(line, len, "mov %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		break;
 	case OPC_LW_OFF:
 		length = SNPRINTF(line, len, "lw  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc)*2, szRegName[Ry]);
         break;
@@ -566,7 +580,7 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 		length = SNPRINTF(line, len, "sw  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc)*2, szRegName[Ry]);
         break;
     case OPC_IMM:
-		length = SNPRINTF(line, len, "imm #%04x", OPC_IMM12(opc));
+		length = SNPRINTF(line, len, "imm #%03x", OPC_IMM12(opc));
         break;
     default:
 		length = SNPRINTF(line, len, "%04x???", opc);

@@ -34,6 +34,18 @@ int MemReadLong(NANO_ADDR addr, NANO_LONG* data)
 	return 2;
 }
 
+int MemWriteByte(NANO_ADDR addr, NANO_WORD data)
+{
+	if (IO_ADDR(addr))
+		OutWriteWord(addr, data);
+	else
+	{
+		int8_t* ptr = ((int8_t*)memory) + addr;
+		*ptr = (int8_t) data;
+	}
+	return 1;
+}
+
 int MemWriteWord(NANO_ADDR addr, NANO_SHORT data)
 {
 	if (ILLEGAL_ADDR(addr))

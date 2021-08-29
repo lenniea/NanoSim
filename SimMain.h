@@ -61,6 +61,7 @@ public:
 	MemListCtrl* m_memory;
 	wxTextCtrl* m_register[REGS];
 	wxCheckBox* m_iobox[16];
+	wxTextCtrl* m_log;
 private:
 	NANO_CPU m_cpu;
     wxDECLARE_EVENT_TABLE();

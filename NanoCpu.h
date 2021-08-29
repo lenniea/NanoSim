@@ -4,6 +4,7 @@
 #define __NANOCPU_H__
 
 #include <stdlib.h>			// for size_t
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -80,7 +81,7 @@ typedef enum
 	OPC_SB_OFF   = 9,
 	OPC_ALU_REG  = 10,
 	OPC_BRANCH   = 11,
-	OPC_REG_IMM  = 12,
+	OPC_MOV_IMM  = 12,
 	OPC_LW_OFF   = 13,
 	OPC_SW_OFF    = 14,
 	OPC_IMM      = 15
@@ -143,6 +144,7 @@ extern NANO_WORD sw_inp;
 
 int MemReadWord(NANO_ADDR addr, NANO_SHORT* data);
 int MemReadLong(NANO_ADDR addr, NANO_LONG* data);
+int MemWriteByte(NANO_ADDR addr, NANO_SHORT data);
 int MemWriteWord(NANO_ADDR addr, NANO_SHORT data);
 int MemWriteLong(NANO_ADDR addr, NANO_LONG data);
 void MemCopyBytes(NANO_ADDR addr, void* buf, int length);
