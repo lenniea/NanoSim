@@ -3,17 +3,20 @@
 #include "NanoCpu.h"
 
 #define LENGTH      80
-#define NANO_WORDS  32768
+#define NANO_WORDS  0xF000
 
 // Program to generate Nano test case
 int main(int argc, const char* argv[])
 {
-    NANO_ADDR addr;
-    for (addr = 0; addr < NANO_WORDS; addr += 7)
+    int skip = (argc == 2) ? atoi(argv[1]) : 17;
+        
+    NANO_ADDR opc;
+    for (opc = 0; opc < NANO_WORDS; opc += skip)
     {
         char line[LENGTH];
-        NanoDisAsm(line, LENGTH, addr * 2, addr * 2);
-        fprintf(stdout, "\t%s\n", line);
+        NANO_ADDR addr = opc * 2;
+        NanoDisAsm(line, LENGTH, addr * 2, opc);
+        fprintf(stdout, "\t%s\t\t; %04X\n", line, opc);
     }
     return 0;
 }

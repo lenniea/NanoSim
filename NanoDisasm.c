@@ -53,28 +53,28 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
     switch (GET_OPC(opc))
 	{
     case OPC_ADD_IMM:
-		length = SNPRINTF(line, len, "add  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "add  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_SUB_IMM:
-		length = SNPRINTF(line, len, "sub  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sub  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
         break;
 	case OPC_ADC_IMM:
-		length = SNPRINTF(line, len, "adc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "adc  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_SBC_IMM:
-		length = SNPRINTF(line, len, "sbc  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sbc  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_RSUB_IMM:
-		length = SNPRINTF(line, len, "rsub %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "rsub %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_AND_IMM:
-		length = SNPRINTF(line, len, "and  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "and  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_OR_IMM:
-		length = SNPRINTF(line, len, "or   %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "or   %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
         break;
     case OPC_XOR_IMM:
-		length = SNPRINTF(line, len, "xor  %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "xor  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
         break;
 	case OPC_LB_OFF:
 		length = SNPRINTF(line, len, "lb  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc), szRegName[Ry]);
@@ -89,7 +89,7 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 		length = SNPRINTF(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
 	case OPC_MOV_IMM:
-		length = SNPRINTF(line, len, "mov %s,#%u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "mov %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
 		break;
 	case OPC_LW_OFF:
 		length = SNPRINTF(line, len, "lw  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc)*2, szRegName[Ry]);
