@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "NanoCpu.h"
 
@@ -20,7 +21,7 @@ char szBra[16][4] =
 {
 /*   0/8    1/9    2/A    3/B    4/C    5/D    6/E    7/F  */
     "beq", "bne", "bhi", "bls", "bhs", "blo", "bgt", "ble",
-    "bge", "blt", "bra", "jmp", "?BC", "?BD", "?BE", "?BF"
+    "bge", "blt", "bra", "jal", "bcx", "bdx", "bex", "bfx"
 };
 
 char szRegName[16][4] =
@@ -86,7 +87,7 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 		length = SNPRINTF(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_BRANCH:
-		length = SNPRINTF(line, len, "%-4s " NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
+		length = SNPRINTF(line, len, "%-4s $" NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);
         break;
 	case OPC_MOV_IMM:
 		length = SNPRINTF(line, len, "mov %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
@@ -101,7 +102,7 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 		length = SNPRINTF(line, len, "imm #%03x", OPC_IMM12(opc));
         break;
     default:
-		length = SNPRINTF(line, len, "%04x???", opc);
+		length = SNPRINTF(line, len, ".word $%04X", opc);
         break;
     }
     return length;

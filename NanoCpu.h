@@ -162,7 +162,7 @@ typedef unsigned long  NANO_TIME;
 	typedef unsigned short NANO_WORD;
 	typedef unsigned short NANO_ADDR;
 	typedef long           NANO_DWORD;
-	#define NANO_SZADDR "%08x"
+	#define NANO_SZADDR "%04x"
 	#define NANO_BITS	16
 	#define NANO_MSB    0x8000
 #endif
