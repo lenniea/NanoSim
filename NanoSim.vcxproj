@@ -496,6 +496,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="NanoCpu.c" />
+    <ClCompile Include="NanoDisasm.c" />
     <ClCompile Include="NanoMem.c" />
     <ClCompile Include="SimMain.cpp" />
   </ItemGroup>

@@ -21,6 +21,9 @@
     <ClCompile Include="NanoMem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NanoDisasm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimMain.h">

@@ -5,7 +5,7 @@ CC = $(shell wx-config --cc)
 
 PROGRAM = NanoSim$(EXE)
 
-OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ) NanoMem.$(OBJ)
+OBJECTS = SimMain.$(OBJ) NanoCpu.$(OBJ) NanoDisasm.$(OBJ) NanoMem.$(OBJ)
 
 # implementation
 

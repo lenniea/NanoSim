@@ -59,6 +59,7 @@ typedef enum
 	COND_BLT,		/* Branch if Less Than */
 	COND_BRA,		/* BRanch Always */
 	COND_RET,		/* RETurn */
+	COND_BC,		/* Branch reserved C */
 	COND_BD,		/* Branch reserved D */
 	COND_BE,		/* Branch reserved E */
 	COND_BF,		/* Repeat reserved F */
@@ -83,10 +84,61 @@ typedef enum
 	OPC_BRANCH   = 11,
 	OPC_MOV_IMM  = 12,
 	OPC_LW_OFF   = 13,
-	OPC_SW_OFF    = 14,
+	OPC_SW_OFF   = 14,
 	OPC_IMM      = 15
 
 } NANO_OPC;
+
+/*
+ *  ALU Rx,#imm
+ *   _______________________________________________________________
+ *  |               |               |                               |
+ *  |      alu      |       Rx      |             imm8              |
+ *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
+ *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
+ *
+ *  ALU Rx,Rx,Ry
+ *   _______________________________________________________________
+ *  |               |               |               |               | 
+ *  |       A       |       Rx      |      Ry       |      alu      |
+ *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
+ *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
+ *
+ *  JAL Rx,addr
+ *   _______________________________________________________________
+ *  |               |               |                               |
+ *  |     opcode    |       Rx      |             imm8              |
+ *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
+ *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
+ *
+ *   Cond Branch
+ *   _______________________________________________________________
+ *  |               |               |                               |
+ *  |     opcode    |      cond     |             disp8             |
+ *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
+ *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
+ *
+ *   Imm Prefix
+ *   _______________________________________________________________
+ *  |               |                                               |
+ *  |     opcode    |                    imm12                      |
+ *  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|
+ *    F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0
+ */
+
+#define GET_OPC(opc)	(((opc) >> NANO_FUNC) & 0x0f)
+#define OPC_COND(opc)   (((opc) >> NANO_RX) & 0x0f)
+
+#define OPC_RX(opc)     (((opc) >> NANO_RX) & 0x0f)
+#define OPC_RY(opc)     (((opc) >> NANO_RY) & 0x0f)
+#define OPC_RZ(opc)     ((opc) & 0x0f)
+
+#define OPC_OFF4(opc)   (((opc) & 0x0f)*2)
+#define OPC_IMM8(opc)   ((opc) & 0xff)
+
+#define OPC_IMM12(opc)  ((opc) & 0xFFF)
+
+#define SIGN_EXT(x,b)   (((x) & (b)) ? (((x) & ((b) - 1)) - (b)) : ((x) & ((b) - 1)))
 
 /*
  *  Simulation Model
