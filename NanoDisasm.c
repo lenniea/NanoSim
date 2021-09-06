@@ -9,8 +9,8 @@
 char szAlu[16][5] =
 {
 /*   0/8     1/9     2/A     3/B     4/C     5/D     6/E     7/F  */
-    "add",  "sub",  "adc",  "sbc ", "rsub",  "and",  "or ",  "xor",
-    "add",  "sub",  "adc",  "sbc ", "rsub",  "and",  "or ",  "xor"
+    "add",  "sub",  "adc",  "sbc ", "rsub", "and",  "or ",  "xor",
+    "mul",  "div",  "asr",  "lsr ", "aluc", "alud", "alue", "aluf"
 };
 
 /*
@@ -21,7 +21,7 @@ char szBra[16][4] =
 {
 /*   0/8    1/9    2/A    3/B    4/C    5/D    6/E    7/F  */
     "beq", "bne", "bhi", "bls", "bhs", "blo", "bgt", "ble",
-    "bge", "blt", "bra", "jal", "bcx", "bdx", "bex", "bfx"
+    "bge", "blt", "bra", "rts", "jal", "bdx", "bex", "bfx"
 };
 
 char szRegName[16][4] =
@@ -54,28 +54,28 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
     switch (GET_OPC(opc))
 	{
     case OPC_ADD_IMM:
-		length = SNPRINTF(line, len, "add  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "add  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
         break;
     case OPC_SUB_IMM:
-		length = SNPRINTF(line, len, "sub  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sub  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
         break;
 	case OPC_ADC_IMM:
-		length = SNPRINTF(line, len, "adc  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "adc  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
 		break;
 	case OPC_SBC_IMM:
-		length = SNPRINTF(line, len, "sbc  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "sbc  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
 		break;
 	case OPC_RSUB_IMM:
-		length = SNPRINTF(line, len, "rsub %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "rsub %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
 		break;
 	case OPC_AND_IMM:
-		length = SNPRINTF(line, len, "and  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "and  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
         break;
     case OPC_OR_IMM:
-		length = SNPRINTF(line, len, "or   %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "or   %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
         break;
     case OPC_XOR_IMM:
-		length = SNPRINTF(line, len, "xor  %s,#%-3u", szRegName[Rx], OPC_IMM8(opc));
+		length = SNPRINTF(line, len, "xor  %s,%s,#%-3u", szRegName[Rx], szRegName[Ry], OPC_IMM4(opc));
         break;
 	case OPC_LB_OFF:
 		length = SNPRINTF(line, len, "lb  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc), szRegName[Ry]);
@@ -84,7 +84,7 @@ int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc)
 		length = SNPRINTF(line, len, "sb  %s,%u[%s]", szRegName[Rx], OPC_OFF4(opc), szRegName[Ry]);
 		break;
 	case OPC_ALU_REG:
-		length = SNPRINTF(line, len, "%s  %s,%s", szAlu[Rx], szRegName[Rx], szRegName[Ry]);
+		length = SNPRINTF(line, len, "%s  %s,%s", szAlu[OPC_RZ(opc)], szRegName[Rx], szRegName[Ry]);
         break;
     case OPC_BRANCH:
 		length = SNPRINTF(line, len, "%-4s $" NANO_SZADDR, szBra[Rx], addr + 2 * SIGN_EXT(opc, 128) + 2);

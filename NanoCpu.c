@@ -252,10 +252,12 @@ int NanoTestCond(NANO_CPU* p, int cond)
         data = p->ccr & (NANO_N|NANO_V|NANO_Z);
         br = (data != 0) && (data != (NANO_N|NANO_V));
         break;
-	case COND_RET:
-		// TODO: implement RETurn
+	case COND_RTS:
 		br = 1;
 		break;
+    case COND_JAL:
+        br = 1;
+        break;
     default:
         br = 0;
     }
@@ -312,60 +314,60 @@ int NanoSimInst(NANO_CPU* p, NANO_STEP step)
 		{
         case OPC_ADD_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            data = ((p)->prefix << 8) | OPC_IMM8(opc);
+            data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-            NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
+            NanoAluOp(p, ALU_ADC, Rx, p->reg[Ry], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_SUB_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            data = ((p)->prefix << 8) | OPC_IMM8(opc);
+            data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-            NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
+            NanoAluOp(p, ALU_ADC, Rx, p->reg[Ry], data);
             p->prefix = NO_PREFIX;
             break;
 		case OPC_ADC_IMM:
-			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+			data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-			NanoAluOp(p, ALU_ADC, Rx, p->reg[Rx], data);
+			NanoAluOp(p, ALU_ADC, Rx, p->reg[Ry], data);
 			p->prefix = NO_PREFIX;
 			break;
 		case OPC_SBC_IMM:
-			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+			data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-			NanoAluOp(p, ALU_SBC, Rx, p->reg[Rx], data);
+			NanoAluOp(p, ALU_SBC, Rx, p->reg[Ry], data);
 			p->prefix = NO_PREFIX;
 			break;
 		case OPC_RSUB_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-			data = ((p)->prefix << 8) | OPC_IMM8(opc);
+			data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-			NanoAluOp(p, ALU_RSUB, Rx, p->reg[Rx], data);
+			NanoAluOp(p, ALU_RSUB, Rx, p->reg[Ry], data);
 			p->prefix = NO_PREFIX;
 			break;
 		case OPC_AND_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            data = ((p)->prefix << 8) | OPC_IMM8(opc);
+            data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-            NanoAluOp(p, ALU_AND, Rx, p->reg[Rx], data);
+            NanoAluOp(p, ALU_AND, Rx, p->reg[Ry], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_OR_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            data = ((p)->prefix << 8) | OPC_IMM8(opc);
+            data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-            NanoAluOp(p, ALU_OR, Rx, p->reg[Rx], data);
+            NanoAluOp(p, ALU_OR, Rx, p->reg[Ry], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_XOR_IMM:
 			p->ccr &= ~NANO_C; // Clear CARRY
-            data = ((p)->prefix << 8) | OPC_IMM8(opc);
+            data = ((p)->prefix << 4) | OPC_IMM4(opc);
 
-            NanoAluOp(p, ALU_XOR, Rx, p->reg[Rx], data);
+            NanoAluOp(p, ALU_XOR, Rx, p->reg[Ry], data);
             p->prefix = NO_PREFIX;
             break;
         case OPC_ALU_REG:
-            NanoAluOp(p, Rz, Rx, p->reg[Rx], Ry);
+            NanoAluOp(p, Rz, Rx, p->reg[Rx], p->reg[Ry]);
             p->prefix = NO_PREFIX;
             break;
 		case OPC_LB_OFF:

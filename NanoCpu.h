@@ -58,8 +58,8 @@ typedef enum
 	COND_BGE,		/* Branch if Greater/Equal */
 	COND_BLT,		/* Branch if Less Than */
 	COND_BRA,		/* BRanch Always */
-	COND_RET,		/* RETurn */
-	COND_BC,		/* Branch reserved C */
+	COND_RTS,		/* ReTurn Subroutine */
+	COND_JAL,		/* Jump And Link */
 	COND_BD,		/* Branch reserved D */
 	COND_BE,		/* Branch reserved E */
 	COND_BF,		/* Repeat reserved F */
@@ -133,7 +133,8 @@ typedef enum
 #define OPC_RY(opc)     (((opc) >> NANO_RY) & 0x0f)
 #define OPC_RZ(opc)     ((opc) & 0x0f)
 
-#define OPC_OFF4(opc)   (((opc) & 0x0f)*2)
+#define OPC_IMM4(opc)   ((opc) & 0x0f)
+#define OPC_OFF4(opc)   ((opc) & 0x0f)
 #define OPC_IMM8(opc)   ((opc) & 0xff)
 
 #define OPC_IMM12(opc)  ((opc) & 0xFFF)
