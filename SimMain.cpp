@@ -207,7 +207,7 @@ const char* szRegNameCaps[18] =
 	"R0", "R1", "R2", "R3",
 	"R4", "R5", "R6", "R7",
 	"R8", "R9", "R10", "R11",
-	"R12", "R13", "R14", "SP",
+	"R12", "R13", "SP", "LR",
 	"PFX", "CCR"
 };
 
@@ -371,15 +371,15 @@ int atohex(const char* buffer, int n)
 	return hex;
 }
 
-#define UART_STATUS	0xC000
-#define UART_DATA	0xD000
-#define GPIO_PORT	0xE000
+#define UART_STATUS	0xFD01
+#define UART_DATA	0xFD00
+#define GPIO_PORT	0xFE00
 
 extern "C" void OutWriteWord(NANO_ADDR addr, NANO_SHORT word)
 {
 	if (myFrame != NULL)
 	{
-		switch (addr & 0xF000)
+		switch (addr & 0xFF01)
 		{
 		case GPIO_PORT:
 			for (int i = 0; i < 16; ++i)
@@ -390,6 +390,7 @@ extern "C" void OutWriteWord(NANO_ADDR addr, NANO_SHORT word)
 			break;
 		case UART_DATA:
 			myFrame->m_log->AppendText((char) word);
+			break;
 		default:
 			;
 		}
@@ -402,12 +403,18 @@ extern "C" NANO_WORD InpReadWord(NANO_ADDR addr)
 	int i;
 	if (myFrame != NULL)
 	{
-		switch (addr & 0xF000)
+		switch (addr & 0xFF01)
 		{
 		case GPIO_PORT:
 			for (i = 0; i < 16; ++i) {
 				if (myFrame->m_iobox[i]->IsChecked()) w |= (1 << i);
 			}
+			break;
+		case UART_DATA:
+			w = 0x8100;
+			break;
+		case UART_STATUS:
+			w = 0x81;
 			break;
 		default:
 			w = 0xDEAD;

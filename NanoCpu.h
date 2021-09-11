@@ -209,6 +209,8 @@ NANO_SHORT InpReadWord(NANO_ADDR addr);
 int NanoSimInst(NANO_CPU* p, NANO_STEP step);
 int NanoDisAsm(char* line, size_t len, NANO_ADDR addr, NANO_INST opc);
 
+extern const char szRegName[16][4];
+
 #ifdef __cplusplus
 }
 #endif

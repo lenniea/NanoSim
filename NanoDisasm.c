@@ -24,11 +24,11 @@ char szBra[16][4] =
     "bge", "blt", "bra", "rts", "jal", "bdx", "bex", "bfx"
 };
 
-char szRegName[16][4] =
+const char szRegName[16][4] =
 {
 /*   0/8    1/9    2/A    3/B    4/C    5/D    6/E    7/F  */
     "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
-    "r8",  "r9",  "r10", "r11", "r12", "r13", "sp",  "r15"
+    "r8",  "r9",  "r10", "r11", "r12", "r13", "sp",  "lr"
 };
 
 #ifdef _MSC_VER

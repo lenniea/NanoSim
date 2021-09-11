@@ -1,0 +1,23 @@
+F0FE ; imm #FE
+C300 ; mov r3,GPIO
+F0FF ; imm #0FF
+C100 ; mov r1,#00
+E130 ; sw r1,0(r3)
+F0FD ; imm #FD
+C400 ; mov r4,#UART
+C220 ; mov r2,#szHello
+8120 ; L1: lb  r1,0(r2)
+A116 ;     or r1,r1
+B003 ;     beq L2
+9140 ;     sb  r1,0(r4)
+0221 ;     add r2,r2,#1
+BAFA ;     bra L1
+BAFF ; L2  bra L2
+0000 ; nop
+6548 ; Hello, Nano!\n
+6C6C
+2C6F
+4E20
+6E61
+216F
+000A
